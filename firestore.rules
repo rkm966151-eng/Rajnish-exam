@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all unknown collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Admins Collection
+    match /admins/{adminId} {
+      allow read: if isAdmin();
+      allow write: if false; // Only configured via Cloud Functions / CLI
+    }
+
+    // Users Collection (Split profile / Private PII protected)
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId);
+      allow update: if (isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isAdmin'])) || isAdmin();
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    // Courses & Lessons (Public read, Admin manage)
+    match /courses/{courseId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      match /lessons/{lessonId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+    }
+
+    // Study Materials (Public read, Admin manage)
+    match /study_materials/{materialId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Exams & Questions (Public read, Admin manage)
+    match /exams/{examId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      match /questions/{questionId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+    }
+
+    // Exam Results & Attempts
+    match /results/{resultId} {
+      allow read: if (isSignedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Orders & Payments
+    match /orders/{orderId} {
+      allow read: if (isSignedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Subscriptions
+    match /subscriptions/{subId} {
+      allow read: if (isSignedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Coupons
+    match /coupons/{couponCode} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Announcements & Notice Board
+    match /announcements/{annId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Support Tickets
+    match /support_tickets/{ticketId} {
+      allow read: if (isSignedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // App Settings
+    match /app_settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

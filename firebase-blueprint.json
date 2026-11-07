@@ -1,0 +1,82 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Student or Admin user profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "role": { "type": "string", "enum": ["student", "admin"] },
+        "createdAt": { "type": "string" },
+        "enrolledCourseIds": { "type": "array" },
+        "coins": { "type": "number" },
+        "streakDays": { "type": "number" }
+      },
+      "required": ["id", "name", "email", "role"]
+    },
+    "Course": {
+      "title": "Course",
+      "description": "Educational course or foundation batch",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "titleHindi": { "type": "string" },
+        "category": { "type": "string" },
+        "price": { "type": "number" },
+        "isFree": { "type": "boolean" },
+        "instructorName": { "type": "string" },
+        "totalDuration": { "type": "string" }
+      },
+      "required": ["id", "title", "price"]
+    },
+    "Exam": {
+      "title": "Exam",
+      "description": "Online CBT Mock Test",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "durationMinutes": { "type": "number" },
+        "totalMarks": { "type": "number" },
+        "negativeMarkingRate": { "type": "number" },
+        "totalQuestions": { "type": "number" }
+      },
+      "required": ["id", "title", "durationMinutes", "totalMarks"]
+    },
+    "StudyMaterial": {
+      "title": "StudyMaterial",
+      "description": "Downloadable PDF note or question bank",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "subject": { "type": "string" },
+        "pdfUrl": { "type": "string" },
+        "pages": { "type": "number" }
+      },
+      "required": ["id", "title", "subject", "pdfUrl"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile records"
+    },
+    "/courses/{courseId}": {
+      "schema": "Course",
+      "description": "All published courses"
+    },
+    "/exams/{examId}": {
+      "schema": "Exam",
+      "description": "All mock tests"
+    },
+    "/study_materials/{materialId}": {
+      "schema": "StudyMaterial",
+      "description": "Digital library documents"
+    }
+  }
+}

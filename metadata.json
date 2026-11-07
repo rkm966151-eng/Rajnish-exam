@@ -1,0 +1,6 @@
+{
+  "name": "Rajnish Factory",
+  "description": "Premium educational Android and web platform featuring live classes, courses, mock exams, PDF notes, quiz system, and admin management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
